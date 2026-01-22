@@ -1,6 +1,8 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const authMiddleware = require("../utils/authMiddleware");
+
 
 const registerUser = ("/register", async (req, res)=>{
     try{
@@ -13,6 +15,7 @@ const registerUser = ("/register", async (req, res)=>{
             email: email,
             password: passwordHash
         });
+        console.log(user);
         await user.save();
         res.status(201).json({ message: "User registered successfully" });
     }
@@ -24,7 +27,7 @@ const registerUser = ("/register", async (req, res)=>{
 
 const loginUser = ("/login", async (req, res)=>{
     try{
-        const {userName, password} = req.params;
+        const {userName, password} = req.body;
         const user = await User.findOne({ userName: userName });
         if (!user){
             throw new Error("Invalid creddentials.");
@@ -43,25 +46,30 @@ const loginUser = ("/login", async (req, res)=>{
         console.error("Error during user login:", err);
         res.status(500).json({ message: "Internal server error" });
     }
-})
+});
 
 const getUser = ("/:userName", async (req, res)=>{
     try{
-
-    }
+        const { userName } = req.params.userName;
+        console.log(userName);
+        // const user = await User.findOne({ userName: userName });
+        // console.log(user);
+        // res.json(user);
+    } 
     catch(err){
         console.error("Error during fetching user details:", err);
     }
-})
+});
 
 const logoutUser = ("/logout", (req, res)=>{
     try{
-
+        res.cookie("token", "null", { expires: new Date(Date.now()) });
+        res.json({ message: "Logout successful" });
     }
     catch(err){
         console.error("Error during user logout:", err);
     }
-})
+});
 
 module.exports = {
     loginUser,
